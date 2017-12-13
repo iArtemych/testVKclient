@@ -7,29 +7,76 @@
 //
 
 import UIKit
+import WebKit
+import SwiftKeychainWrapper
+//-----------------------------------------------------------------
+
+//var token : String = ""
+//-----------------------------------------------------------------
 
 class LoginViewController: UIViewController {
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
+    
+    let vkservices = vkService()
+    
     
 
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+    @IBOutlet weak var webview: WKWebView!{
+        didSet{
+            
+            webview.navigationDelegate = self
+        }
     }
-    */
+    
+    
+//-----------------------------------------------------------------
 
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        webview.load(vkservices.authVk())
+        
+        }
+}
+//---------------------------------------------------------------------------------
+
+extension LoginViewController: WKNavigationDelegate {
+    func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+        
+        guard let url = navigationResponse.response.url, url.path == "/blank.html", let fragment = url.fragment  else {
+            decisionHandler(.allow)
+            return
+        }
+        print("huy osla")
+        let params = fragment
+            .components(separatedBy: "&")
+            .map { $0.components(separatedBy: "=") }
+            .reduce([String: String]()) { result, param in
+                var dict = result
+                let key = param[0]
+                let value = param[1]
+                dict[key] = value
+                return dict
+        }
+        
+        if let token = params["access_token"]
+        {
+            KeychainWrapper.standard.set(token, forKey: "token")
+        }
+        
+        if let user_id = Int(params["user_id"]!)
+        {
+            KeychainWrapper.standard.set(user_id, forKey: "user_id")
+        }
+        
+//        if loginToken != nil
+//        {
+//        token = loginToken!
+//        }
+//        print(token)
+        
+        decisionHandler(.cancel)
+        performSegue(withIdentifier: "autoLogin", sender: true)
+        
+    }
 }

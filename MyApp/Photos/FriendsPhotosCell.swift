@@ -10,4 +10,11 @@ import UIKit
 
 class FriendsPhotosCell: UICollectionViewCell {
     
+    @IBOutlet weak var icon: UIImageView!
+}
+extension FriendsPhotosCell: HaveImageView {
+    
+    func giveImageView() -> UIImageView {
+        return icon
+    }
 }

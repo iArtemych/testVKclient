@@ -9,7 +9,9 @@
 import UIKit
 
 class UserGroupsCell: UITableViewCell {
-
+    @IBOutlet weak var groupName: UILabel!
+    @IBOutlet weak var groupImage: UIImageView!
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
